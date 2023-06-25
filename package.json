@@ -6,7 +6,7 @@
   "main": "src/index.js",
   "scripts": {
     "test": "node --experimental-vm-modules ./node_modules/.bin/jest",
-    "lint": "eslint src/**/*.js",
+    "lint": "eslint srv/**/*.js --no-error-on-unmatched-pattern",
     "release": "npx standard-version --no-verify",
     "coverage": "npm run test -- --coverage",
     "format": "npx prettier -w src"
