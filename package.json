@@ -2,10 +2,9 @@
   "name": "hyper-scheduler",
   "description": "Hyper Scheduler Management",
   "version": "0.0.1",
-  "type": "module",
   "main": "src/index.js",
   "scripts": {
-    "test": "node --experimental-vm-modules ./node_modules/.bin/jest",
+    "test": "node ./node_modules/.bin/jest",
     "lint": "eslint srv/**/*.js --no-error-on-unmatched-pattern",
     "release": "npx standard-version --no-verify",
     "coverage": "npm run test -- --coverage",
@@ -21,6 +20,7 @@
   },
   "devDependencies": {
     "@cap-js/sqlite": "^1.0.0",
+    "@sap/eslint-plugin-cds": "^2.6.3",
     "@types/jest": "^29.5.2",
     "@types/node": "^18.16.18",
     "axios": "^1.4.0",
@@ -38,8 +38,9 @@
     ],
     "transform": {},
     "testEnvironment": "node",
-    "testRegex": "/test/.*\\.test\\.[m]?js$",
+    "testRegex": "/test/.*\\.test\\.cjs$",
     "moduleFileExtensions": [
+      "cjs",
       "js",
       "mjs",
       "json"
@@ -47,8 +48,11 @@
   },
   "license": "MIT",
   "dependencies": {
+    "@newdash/newdash": "^5.22.0",
     "@sap/cds": "^7.0.0",
     "commonjs-extension-resolution-loader": "^0.1.0",
+    "cron": "^2.3.1",
+    "cron-parser": "^4.8.1",
     "express": "^4.18.2"
   }
 }

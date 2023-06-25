@@ -9,5 +9,14 @@
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "[cds]": {
     "editor.defaultFormatter": "SAPSE.vscode-cds"
-  }
+  },
+  "eslint.validate": [
+    "cds",
+    "csn",
+    "csv",
+    "csv",
+    "csv (semicolon)",
+    "tsv",
+    "tab"
+  ]
 }

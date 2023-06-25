@@ -1,0 +1,10 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`CAP Base Test Suite should support reject wrong cron pattern 1`] = `
+{
+  "@Common.numericSeverity": 4,
+  "code": "400",
+  "message": "Constraint error, got value 40 expected range 1-31",
+  "target": "cron",
+}
+`;

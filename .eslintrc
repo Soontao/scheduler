@@ -1,12 +1,13 @@
 {
-  "root": true,
+  "root": false,
   "plugins": [],
   "parserOptions": {
     "ecmaVersion": 13,
     "sourceType": "module"
   },
   "extends": [
-    "eslint:recommended"
+    "eslint:recommended",
+    "plugin:@sap/cds/recommended"
   ],
   "env": {
     "node": true,
@@ -16,7 +17,7 @@
   "rules": {
     "semi": [
       2
-    ], // must end with semi
+    ],
     "no-extra-semi": [
       0
     ],
