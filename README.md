@@ -11,5 +11,6 @@
 - [ ] Capacity Restriction
 - [ ] Queue Job
 - [ ] Priority Job
+- [ ] Safe Stop
 
 ## [LICENSE](./LICENSE)

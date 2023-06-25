@@ -6,7 +6,7 @@ cds.on("served", async () => {
 });
 
 cds.on("shutdown", () => {
-  stop_bg_runner()
-})
+  stop_bg_runner();
+});
 
 module.exports = cds.server;
