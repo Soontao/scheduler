@@ -6,5 +6,8 @@
     "source.fixAll": true,
     "source.organizeImports": true
   },
-  "editor.defaultFormatter": "esbenp.prettier-vscode"
+  "editor.defaultFormatter": "esbenp.prettier-vscode",
+  "[cds]": {
+    "editor.defaultFormatter": "SAPSE.vscode-cds"
+  }
 }

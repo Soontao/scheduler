@@ -14,7 +14,7 @@
     ]
   },
   "include": [
-    "src"
+    "srv"
   ],
   "exclude": [
     "commitlint.config.js"
