@@ -1,0 +1,22 @@
+{
+  "compilerOptions": {
+    "newLine": "lf",
+    "target": "ES2021",
+    "module": "es2015",
+    "outDir": "lib",
+    "esModuleInterop": true,
+    "moduleResolution": "node",
+    "emitDecoratorMetadata": true,
+    "experimentalDecorators": true,
+    "declaration": true,
+    "lib": [
+      "ES6"
+    ]
+  },
+  "include": [
+    "src"
+  ],
+  "exclude": [
+    "commitlint.config.js"
+  ]
+}
