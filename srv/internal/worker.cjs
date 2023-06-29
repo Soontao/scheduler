@@ -1,5 +1,7 @@
+/* eslint-disable no-unused-vars */
+/* eslint-disable no-inner-declarations */
 const { Worker, isMainThread, parentPort, workerData } = require('node:worker_threads');
-const cds = require("@sap/cds")
+const cds = require("@sap/cds");
 
 if (isMainThread) {
 
@@ -20,12 +22,12 @@ if (isMainThread) {
     });
   };
 
-  module.exports = { handle_task }
+  module.exports = { handle_task };
 }
 else {
   const { context_id, task, job } = workerData;
-  cds.context = undefined
-  cds.context = { id: context_id } // restore context id
+  cds.context = undefined;
+  cds.context = { id: context_id }; // restore context id
 
   // TODO: implementation
   // parentPort.postMessage
