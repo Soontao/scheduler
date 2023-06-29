@@ -5,12 +5,18 @@
 ## Features
 
 - [ ] Job Management
-- [ ] Easy to Use UI
+  - [ ] Queue Job
+  - [ ] Priority Job
+  - [ ] Simple Task Execution
+  - [ ] Complicated Task Execution
+    - [ ] Callback Task - External HTTP Callback
+    - [ ] Script Engine - Powerful Customization
+- [ ] Job Monitoring
+  - [ ] Easy to Use User Interface
 - [ ] Authentication
-- [ ] Simple Task Execution
 - [ ] Capacity Restriction
-- [ ] Queue Job
-- [ ] Priority Job
+- [ ] Multi Node Workers
 - [ ] Safe Stop
+- [ ] High Availability
 
 ## [LICENSE](./LICENSE)
