@@ -11,7 +11,13 @@
     "declaration": true,
     "lib": [
       "ES6"
-    ]
+    ],
+    "checkJs": false,
+    "paths": {
+      "#cds-models/*": [
+        "./@cds-models/*"
+      ]
+    }
   },
   "include": [
     "srv"
