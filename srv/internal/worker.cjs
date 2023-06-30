@@ -4,6 +4,8 @@ const { Worker, isMainThread, parentPort, threadId } = require('node:worker_thre
 const cds = require("@sap/cds");
 const { createPool } = require("generic-pool");
 const { cpus } = require('node:os');
+const { run_task } = require('./tasks.cjs');
+const { _update_task_exec_status } = require('./dao.cjs');
 
 if (isMainThread) {
 
@@ -35,25 +37,32 @@ if (isMainThread) {
   );
 
   // TODO: cpu based semaphore
-  async function handle_task(job, task) {
+  /**
+   * 
+   * @param {any} job 
+   * @param {any} task 
+   * @returns {Promise<Array<import('./background-runner.cjs').LogEntry>>}
+   */
+  async function handle_task(job, task, task_exec_id) {
     const worker = await pool.acquire();
+    await _update_task_exec_status(task_exec_id, "PROCESSING");
 
     return new Promise((resolve, reject) => {
       // TODO: timeout
       // TODO: live time message
 
       worker.once('message', (msg) => {
-        const { data, error } = msg;
+        const { logs, error } = msg;
         if (error) {
           reject(error);
         }
         else {
-          resolve(data);
+          resolve(logs);
         }
         pool.release(worker).catch(logger.error);
       });
 
-      worker.postMessage({ context_id: cds.context.id, job, task });
+      worker.postMessage({ context_id: cds.context.id, job, task, task_exec_id });
 
     });
   };
@@ -67,35 +76,18 @@ if (isMainThread) {
 }
 else {
   const logger = cds.log(`worker-${threadId}|worker`);
-  const { newQuickJSAsyncWASMModule } = require("quickjs-emscripten");
 
   parentPort.on("message", async (message = {}) => {
-    const { context_id, task, job } = message;
+    const { context_id, task, job, task_exec_id } = message;
     try {
-      const param = JSON.parse(task.param ?? "{}");
 
       logger.debug("executing task", task.name, "of job", job.name);
       cds.context = undefined;
       cds.context = { id: context_id }; // restore context id
 
-      const quickjs = await newQuickJSAsyncWASMModule();
-      const runtime = quickjs.newRuntime({
-        memoryLimitBytes: (cds.env.jobs?.vm?.mem?.max ?? 30) * 2 ** 10 * 2 ** 10// MB
-      });
-      const vm = runtime.newContext();
+      const task_ctx = await run_task(task, job, task_exec_id);
 
-      const result = await vm.evalCodeAsync("1+1");
-
-      if (result.error) {
-        throw vm.dump(result.error);
-      } else {
-        logger.info("vm execution result is", vm.dump(result.value));
-      }
-
-      vm.dispose();
-      runtime.dispose();
-
-      parentPort.postMessage({ data: [] });
+      parentPort.postMessage({ logs: task_ctx.logs });
 
     } catch (error) {
       logger.error('failed to handle task', task.name);

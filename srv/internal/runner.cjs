@@ -3,32 +3,10 @@ const cds = require("@sap/cds");
 const logger = cds.log("runner");
 const cron = require("cron");
 const { handle_task, destroy_pool } = require("./worker.cjs");
+const { message4 } = require("./utils.js");
+const { _run, _update_job_exec_status, _update_task_exec_status, _insert_log_entries, _create_task_exec, _create_job_exec } = require("./dao.cjs");
+const { inspect } = require("util");
 
-/**
- * @typedef ExecStatus
- * @type {'SUCCESS'|'PENDING'|'PROCESSING'|'FAILED'}
- */
-
-/**
- * @typedef LogEntry
- * @type {{
- *  ID?: string;
- *  parent_ID: string;
- *  message: string;
- *  severity: string;
- *  timestamp: string;
- * }}
- */
-
-/**
- * perform auto commit query
- * 
- * @param {*} query 
- * @returns {Promise<any>}
- */
-function _run(query) {
-  return cds.tx((tx) => tx.run(query));
-}
 
 async function _restore_processing_execution() {
   // failed original execution
@@ -55,20 +33,18 @@ function _create_job_tick(job_ID) {
     }
     const tasks = await _run(SELECT.from("Task").where({ job_ID })) ?? [];
 
-    const jobExecution_ID = cds.utils.uuid();
-    await _run(INSERT.into("JobExecution").entries({
-      ID: jobExecution_ID,
+    const { ID: job_exec_id } = await _create_job_exec({
       job_ID,
       logs: [
         {
           message: "start executing job"
         }
       ],
-    }));
+    });
 
     // TODO: limit
     const allResults = await Promise.allSettled(
-      tasks.map(task => _execute_task(job, jobExecution_ID, task))
+      tasks.map(task => _execute_task(job, job_exec_id, task))
     );
 
     const failedTasks = allResults.filter(r => r.status === 'rejected');
@@ -76,18 +52,18 @@ function _create_job_tick(job_ID) {
     try {
       if (failedTasks.length === 0) {
         await _insert_log_entries({
-          parent_ID: jobExecution_ID,
+          parent_ID: job_exec_id,
           message: 'job exeution finished'
         });
-        await _update_job_exec_status(jobExecution_ID, "SUCCESS");
+        await _update_job_exec_status(job_exec_id, "SUCCESS");
       }
       else {
         await _insert_log_entries(...failedTasks.map(r => ({
-          parent_ID: jobExecution_ID,
+          parent_ID: job_exec_id,
           severity: "ERROR",
-          message: r.reason?.message ?? String(r.reason)
+          message: inspect(r.reason),
         })));
-        await _update_job_exec_status(jobExecution_ID, "FAILED");
+        await _update_job_exec_status(job_exec_id, "FAILED");
       }
     } catch (error) {
       logger.error("failed save job status", error);
@@ -97,72 +73,34 @@ function _create_job_tick(job_ID) {
 }
 
 async function _execute_task(job, jobExecution_ID, task) {
-  const taskExecution_ID = cds.utils.uuid();
 
-  await _run(INSERT.into("TaskExecution").entries({
-    ID: taskExecution_ID,
+  const { ID: task_exec_id } = await _create_task_exec({
     jobExecution_ID,
     task_ID: task.ID,
-    logs: [
-      {
-        message: "start executing job"
-      }
-    ],
-  }));
+    status: "PENDING"
+  });
 
   try {
-    const logs = await handle_task(job, task);
-    await _insert_log_entries(...logs.map(log => ({ ...log, parent_ID: taskExecution_ID })));
-    await _update_task_exec_status(taskExecution_ID, "SUCCESS");
+    const logs = await handle_task(job, task, task_exec_id);
+    await _insert_log_entries(...logs);
+    if (logs.find(log => log.severity === 'ERROR')) {
+      throw new Error("inner error happened");
+    }
+    await _update_task_exec_status(task_exec_id, "SUCCESS");
     logger.debug("finish task", task.name, 'of job', job.name);
     return;
   } catch (error) {
     logger.error("failed to execute task", task.name, 'of job', job.name);
-    await _insert_log_entries({
-      parent_ID: taskExecution_ID,
-      severity: "ERROR",
-      message: error?.message ?? String(error)
-    });
-    await _update_task_exec_status(taskExecution_ID, "FAILED");
+    await _insert_log_entries(
+      {
+        parent_ID: task_exec_id,
+        severity: "ERROR",
+        message: message4("failed to execute task", task.name, 'of job', job.name)
+      }
+    );
+    await _update_task_exec_status(task_exec_id, "FAILED");
     throw new Error(`task ${task.name} failed by error ${error?.message}`);
   }
-}
-
-/**
- * 
- * @param {string} jobExecution_ID 
- * @param {ExecStatus} status 
- * @returns 
- */
-function _update_job_exec_status(jobExecution_ID, status) {
-  return _run(
-    UPDATE
-      .entity("JobExecution")
-      .where({ ID: jobExecution_ID })
-      .set({ status })
-  );
-}
-
-/**
- * 
- * @param {string} taskExecution_ID 
- * @param {ExecStatus} status 
- * @returns 
- */
-function _update_task_exec_status(taskExecution_ID, status) {
-  return _run(
-    UPDATE.entity("TaskExecution").where({ ID: taskExecution_ID }).set({ status })
-  );
-}
-
-/**
- * 
- * @param  {...LogEntry} entries 
- * @returns 
- */
-function _insert_log_entries(...entries) {
-  if (entries.length === 0) { return; }
-  return _run(INSERT.into("LogEntry").entries(...entries));
 }
 
 

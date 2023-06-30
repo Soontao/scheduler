@@ -5,6 +5,12 @@ type Severity  : String(10) enum {
   ERROR;
 } default 'INFO';
 
+type TaskKind  : String(20) enum {
+  NOTHING;
+  CALLBACK_REST;
+  CUSTOM_SCRIPT
+}
+
 /**
  * status
  */
@@ -58,5 +64,5 @@ type UpdatedAt : Timestamp  @cds.on.insert: $now  @cds.on.update: $now;
 aspect exec_track {
   startAt    : Timestamp @cds.on.insert: $now;
   finishedAt : Timestamp @cds.on.update: $now;
-  status     : Status default 'TIME_PENDING';
+  status     : Status default 'PENDING';
 }

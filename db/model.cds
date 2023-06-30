@@ -8,7 +8,8 @@ using {
   exec_track,
   Status,
   Severity,
-  CreatedAt
+  CreatedAt,
+  TaskKind
 } from './type';
 
 @assert.unique: {code: [name]}
@@ -46,6 +47,7 @@ entity Task : cuid {
   // optional if the job `parallelTasks` is false
   // higher `order` task will be executed firstly
   order : Integer default 0;
+  kind  : TaskKind default 'NOTHING'; // by default do nothing
   param : LargeString; // optional parameters for task, should be a json string
   job   : Association to one Job;
 }

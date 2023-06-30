@@ -1,6 +1,6 @@
 // @ts-nocheck
 const cds = require("@sap/cds");
-const { start_bg_runner, stop_bg_runner } = require("./internal/background-runner.cjs");
+const { start_bg_runner, stop_bg_runner } = require("./internal/runner.cjs");
 
 cds.on("served", async () => {
   await start_bg_runner();
