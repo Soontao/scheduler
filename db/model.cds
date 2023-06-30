@@ -40,7 +40,7 @@ entity Job : cuid, managed {
   job,
   name
 ]}
-entity Task : cuid {
+entity Task : cuid, managed {
   @Core.Immutable
   name  : String(255) not null;
 
@@ -51,6 +51,15 @@ entity Task : cuid {
   param : LargeString; // optional parameters for task, should be a json string
   job   : Association to one Job;
 }
+
+
+// TODO: simple config change track table
+view LatestConfigChangedAt as
+    select max(max_changed_at) as max_changed_at from (
+      select max(modifiedAt) as max_changed_at from Task
+    union
+      select max(modifiedAt) as max_changed_at from Job
+    );
 
 
 entity JobExecution : cuid, managed, exec_track {
