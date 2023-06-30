@@ -17,12 +17,14 @@ if (isMainThread) {
 
         worker.on('error', err => {
           logger.error("worker", worker.threadId, "error", err);
-          pool.destroy(worker).catch(logger.error);
+          if (pool.isBorrowedResource(worker))
+            pool.destroy(worker).catch(logger.error);
         });
 
         worker.on('exit', (code) => {
-          logger.error("worker", worker.threadId, "crashed", code);
-          pool.destroy(worker).catch(logger.error);
+          logger.error("worker", worker.exit, "crashed", code);
+          if (pool.isBorrowedResource(worker))
+            pool.destroy(worker).catch(logger.error);
         });
 
         return worker;
@@ -31,7 +33,7 @@ if (isMainThread) {
     },
     {
       min: 1,
-      max: cds.env.jobs?.worker?.max ?? cpus().length,
+      max: cds.env.jobs?.worker?.max ?? (cpus().length - 1),
       autostart: true
     }
   );
