@@ -1,6 +1,8 @@
 # Hyper Job Scheduler
 
-> central management job scheduling
+[![node test](https://github.com/Soontao/scheduler/actions/workflows/nodejs.yml/badge.svg)](https://github.com/Soontao/scheduler/actions/workflows/nodejs.yml)
+
+central job scheduling
 
 ## Features
 

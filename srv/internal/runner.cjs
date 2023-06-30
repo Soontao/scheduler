@@ -4,7 +4,10 @@ const logger = cds.log("runner");
 const cron = require("cron");
 const { handle_task, destroy_pool } = require("./worker.cjs");
 const { message4 } = require("./utils.js");
-const { _run, _update_job_exec_status, _update_task_exec_status, _insert_log_entries, _create_task_exec, _create_job_exec } = require("./dao.cjs");
+const {
+  _run, _update_job_exec_status, _update_task_exec_status,
+  _insert_log_entries, _create_task_exec, _create_job_exec
+} = require("./dao.cjs");
 const { inspect } = require("util");
 
 
@@ -31,7 +34,7 @@ function _create_job_tick(job_ID) {
       // not existed or not active
       return;
     }
-    const tasks = await _run(SELECT.from("Task").where({ job_ID })) ?? [];
+    const tasks = await _run(SELECT.from("Task").where({ job_ID }).orderBy("order desc")) ?? [];
 
     const { ID: job_exec_id } = await _create_job_exec({
       job_ID,
@@ -42,7 +45,11 @@ function _create_job_tick(job_ID) {
       ],
     });
 
+    // TODO: job re-schedule depends on tasks load
+
+    // TODO: parallelTasks
     // TODO: limit
+
     const allResults = await Promise.allSettled(
       tasks.map(task => _execute_task(job, job_exec_id, task))
     );
@@ -109,14 +116,12 @@ async function _execute_task(job, jobExecution_ID, task) {
  */
 const _in_mem_jobs = new Map();
 
-
-
 /**
  * sync database configuration to mem job
  */
 async function _sync_mem_jobs() {
   try {
-    const query = SELECT.from("Job").where({ active: true });
+    const query = SELECT.from("Job").where({ active: true }); // builder
     const _in_mem_job_keys = Array.from(_in_mem_jobs.keys());
     if (_in_mem_job_keys.length > 0) {
       await _clear_in_active_mem_jobs(_in_mem_job_keys);

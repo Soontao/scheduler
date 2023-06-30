@@ -2,11 +2,8 @@
 /* eslint-disable no-case-declarations */
 const cds = require("@sap/cds");
 const { newQuickJSAsyncWASMModule } = require("quickjs-emscripten");
-const { message4 } = require("./utils.js");
+const { message4, _now } = require("./utils.js");
 const logger = cds.log('tasks');
-
-
-const _now = () => new Date().toISOString();
 
 class TaskContext {
   constructor(task_exec_id) {
