@@ -52,7 +52,7 @@
     "@newdash/newdash": "^5.22.0",
     "@sap/cds": "^8.0.0",
     "commonjs-extension-resolution-loader": "^0.1.0",
-    "cron": "^3.0.0",
+    "cron": "^4.0.0",
     "cron-parser": "^4.8.1",
     "express": "^4.18.2",
     "generic-pool": "^3.9.0",
