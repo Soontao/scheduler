@@ -50,7 +50,7 @@
   "license": "MIT",
   "dependencies": {
     "@newdash/newdash": "^5.22.0",
-    "@sap/cds": "^8.0.0",
+    "@sap/cds": "^9.0.0",
     "commonjs-extension-resolution-loader": "^0.1.0",
     "cron": "^4.0.0",
     "cron-parser": "^4.8.1",
